@@ -73,37 +73,6 @@ jobs:
           name: compiled
           path: ./*.deb
 
-  convert2rpm:
-    runs-on: ubuntu-latest
-    needs: compile
-    env:
-      APP_VERSION: ${{ needs.compile.outputs.version }}
-
-    container:
-      image: quay.io/fedora/fedora:latest
-
-    steps:
-      - name: Check version
-        run: echo $APP_VERSION
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
-
-      - name: Setup JVM
-        uses: actions/setup-java@v3.12.0
-        with:
-          java-version: '17'
-          distribution: temurin
-
-      - name: Convert JAR To RPM
-        run: jpackage --input ./compiled --main-jar JavaToExe-$APP_VERSION.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe --app-version $APP_VERSION
-
-      - name: Upload RPM
-        uses: actions/upload-artifact@v3
-        with:
-          name: compiled
-          path: ./*.rpm
-
   convert2exe:
     runs-on: windows-latest
     needs: compile
@@ -162,7 +131,7 @@ jobs:
 
   upload:
     runs-on: ubuntu-latest
-    needs: [convert2deb, convert2rpm, convert2exe, convert2dmg]
+    needs: [convert2deb, convert2exe, convert2dmg]
     env:
       APP_VERSION: ${{ needs.compile.outputs.version }}
 
