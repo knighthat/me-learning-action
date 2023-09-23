@@ -35,7 +35,7 @@ jobs:
         id: version
         run: |
           version=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
-          echo "APP_VERSION=$version" >> $GITHUB_OUTPUT
+          echo "APP_VERSION=$version" >> $GITHUB_ENV
 
       - name: Upload JAR
         uses: actions/upload-artifact@v3
