@@ -8,10 +8,7 @@ on:
 jobs:
   compile:
     runs-on: ubuntu-latest
-
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -30,14 +27,15 @@ jobs:
         run: ls -lAh ./target/
 
       - name: Install xmllint
-        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
-
-      - name: Check xmllint Version
-        run: xmllint --version
+        run: |
+          sudo apt-get update && sudo apt-get install -y libxml2-utils
+          xmllint --version
 
       - name: Acquire App Version
         id: version
-        run: echo "version=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)" >> $GITHUB_OUTPUT
+        run: |
+          version=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
+          echo "APP_VERSION=$version" >> $GITHUB_OUTPUT
 
       - name: Upload JAR
         uses: actions/upload-artifact@v3
@@ -48,12 +46,10 @@ jobs:
   convert2deb:
     runs-on: ubuntu-latest
     needs: compile
-    env:
-      APP_VERSION: ${{ needs.compile.outputs.version }}
 
     steps:
       - name: Check version
-        run: echo $APP_VERSION
+        run: echo ${{ env.APP_VERSION }}
 
       - name: Download Artifact
         uses: actions/download-artifact@v3
@@ -65,8 +61,11 @@ jobs:
           distribution: temurin
 
       - name: Convert JAR To DEB
-        run: jpackage --input ./compiled --main-jar JavaToExe-$APP_VERSION.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe --app-version $APP_VERSION
+        run: jpackage --input ./compiled --main-jar JavaToExe-${{ env.APP_VERSION }}.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe --app-version ${{ env.APP_VERSION }}
 
+      - name: Rename DEB File
+        run: mv ./*.deb JavaToExe-${{ env.APP_VERSION }}_amd64.deb
+        
       - name: Upload DEB
         uses: actions/upload-artifact@v3
         with:
@@ -76,12 +75,10 @@ jobs:
   convert2exe:
     runs-on: windows-latest
     needs: compile
-    env:
-      APP_VERSION: ${{ needs.compile.outputs.version }}
-
+    
     steps:
       - name: Check version
-        run: echo $APP_VERSION
+        run: echo ${{ env.APP_VERSION }}
 
       - name: Download Artifact
         uses: actions/download-artifact@v3
@@ -93,8 +90,11 @@ jobs:
           distribution: temurin
 
       - name: Convert JAR To EXE
-        run: jpackage --input ./compiled --main-jar JavaToExe-$env:APP_VERSION.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe --app-version $env:APP_VERSION
+        run: jpackage --input ./compiled --main-jar JavaToExe-${{ env.APP_VERSION }}.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe --app-version ${{ env.APP_VERSION }}
 
+      - name: Rename EXE File
+        run: mv ./*.exe JavaToExe-${{ env.APP_VERSION }}_x86_64.exe
+        
       - name: Upload EXE
         uses: actions/upload-artifact@v3
         with:
@@ -104,8 +104,6 @@ jobs:
   convert2dmg:
     runs-on: macos-latest
     needs: compile
-    env:
-      APP_VERSION: ${{ needs.compile.outputs.version }}
 
     steps:
       - name: Check version
@@ -121,8 +119,11 @@ jobs:
           distribution: temurin
 
       - name: Convert JAR To DMG
-        run: jpackage --input ./compiled --main-jar JavaToExe-$APP_VERSION.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe
+        run: jpackage --input ./compiled --main-jar JavaToExe-${{ env.APP_VERSION }}.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe
 
+      - name: Rename DMG File
+        run: mv ./*.dmg JavaToExe-${{ env.APP_VERSION }}.dmg
+        
       - name: Upload DMG
         uses: actions/upload-artifact@v3
         with:
@@ -132,8 +133,6 @@ jobs:
   upload:
     runs-on: ubuntu-latest
     needs: [convert2deb, convert2exe, convert2dmg]
-    env:
-      APP_VERSION: ${{ needs.compile.outputs.version }}
 
     steps:
       - name: Download Artifact
@@ -152,5 +151,5 @@ jobs:
           draft: false
           prerelease: false
           tag_name: beta
-          name: v$APP_VERSION
+          name: "v${{ env.APP_VERSION }}"
           token: ${{ secrets.TEMP_TOKEN }}
