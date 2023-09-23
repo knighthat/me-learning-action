@@ -34,8 +34,9 @@ jobs:
       - name: Acquire App Version
         id: version
         run: |
-          version=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
-          echo "APP_VERSION=$version" >> $GITHUB_ENV
+          echo "APP_VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)" >> $GITHUB_ENV
+          echo ${{ env.APP_VERSION }}
+
 
       - name: Upload JAR
         uses: actions/upload-artifact@v3
