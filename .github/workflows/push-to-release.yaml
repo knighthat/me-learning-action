@@ -89,7 +89,7 @@ jobs:
 
       - name: Publish Artifacts to Release
         run: |
-          gh auth login --with-token ${{ secrets.TEMP_TOKEN }}
+          gh auth login --with-token << "${{ secrets.TEMP_TOKEN }}"
 
           RELEASE_ID=$(gh release list --limit 1 --json id --repo knighthat/me-learning-action | jq -r '.[0].id')
 
