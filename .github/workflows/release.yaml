@@ -2,8 +2,7 @@ name: Deploy Release
 
 on:
   push:
-    branches:
-      - master
+    branches: []
 
 jobs:
   compile:
