@@ -76,6 +76,8 @@ jobs:
   upload:
     runs-on: ubuntu-latest
     needs: convert2deb
+    env:
+      GH_TOKEN: ${{ secrets.TEMP_TOKEN }}
 
     steps:
       - name: Download Artifact
@@ -89,7 +91,7 @@ jobs:
 
       - name: Publish Artifacts to Release
         run: |
-          gh auth login --with-token << "${{ secrets.TEMP_TOKEN }}"
+          gh auth login --with-token
 
           RELEASE_ID=$(gh release list --limit 1 --json id --repo knighthat/me-learning-action | jq -r '.[0].id')
 
