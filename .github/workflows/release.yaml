@@ -1,8 +1,6 @@
 name: Deploy Release
 
-on:
-  push:
-    branches: []
+on: []
 
 jobs:
   compile:
