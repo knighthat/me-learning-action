@@ -1,0 +1,96 @@
+name: Push Compiled JAR To Created Release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup JVM
+        uses: actions/setup-java@v3.12.0
+        with:
+          java-version: '17'
+          distribution: temurin
+          cache: 'maven'
+
+      - name: Compile To JAR File
+        run: mvn -B validate package
+
+      - name: Check Compiled File
+        run: ls -lAh ./target/
+
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Check xmllint Version
+        run: xmllint --version
+
+      - name: Acquire App Version
+        id: version
+        run: echo "version=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)" >> $GITHUB_OUTPUT
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled
+          path: ./target/*.jar
+
+  convert2deb:
+    runs-on: ubuntu-latest
+    needs: compile
+    env:
+      APP_VERSION: ${{ needs.compile.outputs.version }}
+
+    steps:
+      - name: Check version
+        run: echo $APP_VERSION
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+
+      - name: Setup JVM
+        uses: actions/setup-java@v3.12.0
+        with:
+          java-version: '17'
+          distribution: temurin
+
+      - name: Convert JAR To DEB
+        run: jpackage --input ./compiled --main-jar JavaToExe-$APP_VERSION.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe --app-version $APP_VERSION
+
+      - name: Upload DEB
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled
+          path: ./*.deb
+
+  upload:
+    runs-on: ubuntu-latest
+    needs: convert2deb
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3.1.3
+        with:
+          name: release-assets
+          path: ./compiled/*
+
+      - name: Publish Artifacts to Release
+        run: |
+          gh auth login --with-token ${{ secrets.TEMP_TOKEN }}
+
+          RELEASE_ID=$(gh release list --limit 1 --json id --repo knighthat/me-learning-action | jq -r '.[0].id')
+
+          gh release upload $RELEASE_ID path/to/your/artifact
