@@ -71,7 +71,7 @@ jobs:
         run: jpackage --input ./compiled --main-jar $APP_NAME-$APP_VERSION.jar --main-class $MAIN_CLASS --name $APP_NAME --app-version $APP_VERSION
         
       - name: Rename DEB File
-        run: mv compiled/*.deb compiled/$APP_NAME-$APP_VERSION_amd64.deb
+        run: mv *.deb $APP_NAME-$APP_VERSION_amd64.deb
 
       - name: Upload DEB
         uses: actions/upload-artifact@v3
@@ -130,7 +130,7 @@ jobs:
         run: jpackage --input ./compiled --main-jar $APP_NAME-$APP_VERSION.jar --main-class $MAIN_CLASS --name $APP_NAME
         
       - name: Rename DMG File
-        run: mv compiled/*.dmg compiled/$APP_NAME-$APP_VERSION.dmg
+        run: mv *.dmg $APP_NAME-$APP_VERSION.dmg
 
       - name: Upload DMG
         uses: actions/upload-artifact@v3
