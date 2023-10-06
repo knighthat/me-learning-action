@@ -90,7 +90,7 @@ jobs:
         run: |
           RELEASE_URL="https://api.github.com/repos/knighthat/me-learning-actio/releases/latest"
           
-          curl -s -H "Authorization: token $(cat token.txt)" "$RELEASE_URL" >> releases.txt
+          curl -s -H "Authorization: token ${{ secrets.TEMP_TOKEN }}" "$RELEASE_URL" >> releases.txt
           
           echo "release_tag=$(cat releases.txt | jq -r '.tag_name')" >> $GITHUB_OUTPUT
 
