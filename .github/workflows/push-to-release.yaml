@@ -88,7 +88,7 @@ jobs:
       - name: Get Release Tag
         id: tag
         run: |
-          RELEASE_URL="https://api.github.com/repos/knighthat/me-learning-actio/releases/latest"
+          RELEASE_URL="https://api.github.com/repos/knighthat/me-learning-action/releases/latest"
           
           curl -s -H "Authorization: token ${{ secrets.TEMP_TOKEN }}" "$RELEASE_URL" >> releases.txt
           
