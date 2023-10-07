@@ -92,6 +92,9 @@ jobs:
       - name: Convert JAR To EXE
         run: jpackage --input ./compiled --main-jar JavaToExe-$env:APP_VERSION.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe --app-version $env:APP_VERSION
 
+      - name: Convert JAR To MSI
+        run: jpackage --input ./compiled --main-jar JavaToExe-$env:APP_VERSION.jar --main-class me.knighthat.javatoexe.JavaToExe --name JavaToExe --app-version $env:APP_VERSION --type msi
+
       - name: Upload EXE
         uses: actions/upload-artifact@v3
         with:
