@@ -4,12 +4,12 @@ on:
     types: [published]
 
 jobs:
-  comment:
+  comment-and-close:
     runs-on: ubuntu-latest
     steps:
       - name: Close issues marked as fixed upon a release.
         uses: gcampbell/fixed-pending-release/@0.0.9
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CLOSE_ISSUE_ON_RELEASE }}
           label: patched
           message: ":tada: This issue has now been fixed and is available in [${releaseTag}](${releaseUrl}) :tada:"
